@@ -88,11 +88,26 @@ Record in the experiment ledger: date, kernel version, LB score, runtime, and th
 vs 33.89 (attributable to DIVERSE_ATTEMPT_2 only). Public LB = ~50 % of 240 tasks, so
 ±0.8 is one task — do not over-read small deltas.
 
+## Improvement flags (pre-push checklist)
+
+Three flags, each independently revertible; **all `False` = byte-equivalent baseline run**:
+
+| flag | cell/file | effect | local evidence |
+|------|-----------|--------|----------------|
+| `DIVERSE_ATTEMPT_2` | final cell | attempt_2 from `score_full_probmul_3` when it disagrees with kgmon | selection-logic unit tests (4 cases) |
+| `CHEAP_FIRST_ORDER` | `starter.py` | task queue cost-ascending (coverage ↑) | deterministic/complete/monotone verified on eval+test JSONs; flag-off == sorted order |
+| `SIZE_CAP_TOKENS` | `arc_solver.py` + `symbolic_size.py` | DFS decode capped at predicted grid token count (per augmented view) | embedded predictor == repo paranoid preset on all 172 eval outputs; fires on 109/172; ZERO truncations vs ground truth in both orientations; swap parity validated against real `augment()` |
+
+Before every push confirm: (1) intended flag values in cells 0-noted locations; (2) the
+notebook still has 11 cells and passes the scratchpad `verify_all.py` suite; (3)
+`kernel-metadata.json` untouched (pinned docker sha, `machine_shape: "NvidiaL4"`).
+
 ## Rollback
 
-Set `DIVERSE_ATTEMPT_2 = False` in the final cell of `notebook.ipynb` and push again —
-this restores the baseline's exact selection (top-2 by `score_kgmon`), byte-equivalent
-pipeline behavior throughout.
+Set `DIVERSE_ATTEMPT_2 = False` (final cell), `CHEAP_FIRST_ORDER = False` (`starter.py`
+cell), and `SIZE_CAP_TOKENS = False` (`arc_solver.py` cell), then push again — this
+restores the baseline's exact behavior throughout (the unused `symbolic_size.py` writefile
+cell is inert).
 
 ## Known risks
 
