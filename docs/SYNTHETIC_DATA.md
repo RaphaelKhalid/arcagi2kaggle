@@ -3,6 +3,14 @@
 Goal: attack the model gap (public checkpoint vs. private leaders) with consensus-verified
 synthetic tasks, NVARC-style, within a $50 OpenAI batch budget.
 
+**Update (Aug 31 recon):** the full NVARC synthetic corpus is already public on Kaggle
+(sorokin's datasets: synthetic 338 MB, augmented 1.3 GB, artifacts 42 GB) — and the public
+checkpoint was trained on it, so retraining on the same data buys little. The $50 budget
+therefore targets *marginal* data only: new consensus-verified tasks in the failure
+categories our eval-set analysis identifies (especially compositional and symbol-semantics
+families where ARC-AGI-2 concentrates), plus program-induction traces (task → verified
+Python solution) to fine-tune a coder model for the evolution loop.
+
 ## Recipe (adapted from NVARC 2025, published method)
 
 1. **Concept inventory** — extract elementary transformation descriptions from public
