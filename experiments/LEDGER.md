@@ -7,7 +7,7 @@ Every scored submission and every local milestone measurement gets a row. Local 
 
 | # | date | notebook version | change under test | local eval | public LB | notes |
 |---|------|------------------|-------------------|-----------|-----------|-------|
-| — | | | | | | none yet |
+| 1 | 2026-08-31 (staged) | e5834e5 Launch B | 4 flags vs 33.89 baseline: DIVERSE_ATTEMPT_2 + CHEAP_FIRST_ORDER + SIZE_CAP_TOKENS + LEGC_ENABLED | local tests green (no full GPU eval possible) | pending | awaiting user permission grant → push → smoke (~35-40min) → verify_kernel_run.py → submit |
 
 ## Local measurements
 
