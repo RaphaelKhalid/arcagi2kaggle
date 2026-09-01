@@ -97,17 +97,27 @@ Three flags, each independently revertible; **all `False` = byte-equivalent base
 | `DIVERSE_ATTEMPT_2` | final cell | attempt_2 from `score_full_probmul_3` when it disagrees with kgmon | selection-logic unit tests (4 cases) |
 | `CHEAP_FIRST_ORDER` | `starter.py` | task queue cost-ascending (coverage ↑) | deterministic/complete/monotone verified on eval+test JSONs; flag-off == sorted order |
 | `SIZE_CAP_TOKENS` | `arc_solver.py` + `symbolic_size.py` | DFS decode capped at predicted grid token count (per augmented view) | embedded predictor == repo paranoid preset on all 172 eval outputs; fires on 109/172; ZERO truncations vs ground truth in both orientations; swap parity validated against real `augment()` |
+| `LEGC_ENABLED` | Leg C launch cell **and** `starter.py` (both must match) | verified program-induction pre-pass (Qwen2.5-Coder-7B): verified outputs → attempt_1, base demoted → attempt_2, verified tasks skipped by base queue; 1.0h budget, 9.8h base reserve | sandbox on a real task: correct→verified w/ ground-truth match, wrong→partial, hostile loop→timeout, banned import→AST-rejected; merge semantics + no-op paths unit-tested; queue reduction verified on 120 eval tasks |
 
 Before every push confirm: (1) intended flag values in cells 0-noted locations; (2) the
-notebook still has 11 cells and passes the scratchpad `verify_all.py` suite; (3)
-`kernel-metadata.json` untouched (pinned docker sha, `machine_shape: "NvidiaL4"`).
+notebook has 14 cells, passes the scratchpad `verify_all.py` suite, and untouched cells
+are byte-identical to the previous version; (3) `kernel-metadata.json` has the pinned
+docker sha, `machine_shape: "NvidiaL4"`, and BOTH model sources
+(`sorokin/qwen3_4b_grids15_sft139/...` and `qwen-lm/qwen2.5-coder/Transformers/7b-instruct/1`).
+
+Note: the Leg C sandbox's per-program timeout uses `SIGALRM` (Linux-only; guarded no-op on
+Windows) — a runaway program locally only dies at the batch-level subprocess timeout. On
+Kaggle it is interrupted per-program at `prog_timeout` (4s). Eval-mode smoke: Leg C is
+restricted via `--tasks` to the base's same 4 smoke tasks (~+7-10 min; total commit run
+~35-40 min).
 
 ## Rollback
 
 Set `DIVERSE_ATTEMPT_2 = False` (final cell), `CHEAP_FIRST_ORDER = False` (`starter.py`
-cell), and `SIZE_CAP_TOKENS = False` (`arc_solver.py` cell), then push again — this
-restores the baseline's exact behavior throughout (the unused `symbolic_size.py` writefile
-cell is inert).
+cell), `SIZE_CAP_TOKENS = False` (`arc_solver.py` cell), and `LEGC_ENABLED = False`
+(Leg C launch cell AND `starter.py`), then push again — this restores the baseline's
+exact behavior throughout (the unused `symbolic_size.py` / `arc_induction_v2.py`
+writefile cells are inert; the extra attached coder model is simply never loaded).
 
 ## Known risks
 
