@@ -15,10 +15,21 @@ writeup-novel:
 2. **Symbolic constraint injection** — falsification-based size/palette predictors prune the
    DFS decode; freed runtime goes into more TTT/candidates.
 3. **Time-budget reallocation** — solve-rate-aware task scheduling across the 4 GPUs.
-4. **Program induction second barrel** — model writes Python transformations, executed and
-   verified against demos; verified programs override ranking (near-zero false positives).
-5. **Synthetic-data continued training** — NVARC-style consensus-verified task generation
-   (see SYNTHETIC_DATA.md), continued fine-tuning of the public checkpoint.
+4. **Three-lineage combination (recon finding: no public notebook does this)** — the
+   perfpatch GPU optimizations + the "Leg C" verified program induction pre-pass
+   (Qwen2.5-Coder-7B samples programs, sandbox-verified against demos, from the
+   `failed-in-aimo` head) + the TRM test-time-training ensemble (CPMP's public
+   `arc-prize-trm-031` checkpoints). Near-disjoint solve sets ⇒ additive points.
+5. **Evolution-style program induction** (the likely 70%-regime mechanism, per Imbue's
+   published code-evolution results: Kimi K2.5 12→34%, Gemini 3.1 Pro 88→95% on public
+   eval) — population of Python programs per task, LLM mutations, fitness = demo
+   correctness + simplicity, executed/verified locally. Reimplement ourselves (Imbue's
+   framework is AGPL v3 — license-incompatible with the CC-BY 4.0 winner obligation; the
+   loop is simple). Run on-Kaggle with a mid-size open coder model.
+6. **Synthetic-data continued training** — the full NVARC synthetic corpus is PUBLIC on
+   Kaggle (sorokin's datasets: synthetic 338 MB, augmented 1.3 GB, artifacts 42 GB).
+   Train on it directly; the $50 OpenAI budget goes to NEW consensus-verified tasks
+   targeting our measured failure categories instead (see SYNTHETIC_DATA.md).
 
 ## Operating rules
 
