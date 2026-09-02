@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f4ef" />
+    <meta name="description" content="A public research notebook on building a top-eight ARC-AGI-2 Kaggle solver." />
+    <meta property="og:title" content="ARC/RESEARCH — The selector is the system" />
+    <meta property="og:description" content="217 iterations of theory, falsification, and release-gated design for ARC-AGI-2." />
+    <meta property="og:type" content="website" />
+    <title>ARC/RESEARCH — ARC-AGI-2 Autoresearch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=STIX+Two+Math&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="ARC Research home"><span class="brand-mark">∴</span><span>ARC<span class="slash">/</span>RESEARCH</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="#findings">Findings</a>
+        <a href="#method">Method</a>
+        <a href="#archive">Archive</a>
+        <a href="#handoff">Handoff</a>
+      </nav>
+      <a class="repo-link" href="https://github.com/RaphaelKhalid/arcagi2kaggle" target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse"></span> Overnight research brief · 02 Sep 2026</p>
+          <h1>The search space<br /><em>is not the answer.</em></h1>
+          <p class="lede">For ARC-AGI-2, the moonshot is not simply generating more grids. It is preserving <span class="term" tabindex="0" data-definition="The fraction of distinct correct output possibilities present somewhere in the candidate set.">candidate-class recall</span>, then choosing the right complete output under a hard clock.</p>
+          <div class="hero-actions">
+            <a class="button button-dark" href="#findings">Read the findings <span>↓</span></a>
+            <a class="button button-quiet" href="#handoff">Open the build plan <span>↗</span></a>
+          </div>
+        </div>
+        <div class="hero-diagram" aria-label="Research thesis diagram">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="diagram-core"><span>y*</span><small>selected output</small></div>
+          <span class="node node-a">recall</span><span class="node node-b">proof</span><span class="node node-c">budget</span><span class="node node-d">shift</span>
+          <div class="diagram-caption"><span>argmax</span><span class="math">P(y | D, lineage, view)</span></div>
+        </div>
+      </section>
+
+      <section class="stats section-shell" aria-label="Campaign statistics">
+        <div class="stat"><strong>9:29:02</strong><span>autonomous runtime</span></div>
+        <div class="stat"><strong>6.7M</strong><span>goal tokens used</span></div>
+        <div class="stat"><strong>217</strong><span>latest numbered iteration</span></div>
+        <div class="stat"><strong>0</strong><span>GPU runs or submissions</span></div>
+      </section>
+
+      <section class="section-shell intro-band">
+        <div class="section-kicker">01 / Executive read</div>
+        <div class="intro-grid">
+          <div><h2>A strong theory campaign.<br /><em>Not yet a score claim.</em></h2></div>
+          <div><p>The loop produced a coherent, release-gated path toward the current low-70s <span class="term" tabindex="0" data-definition="A candidate output that is correct under the competition's output-position scoring rule.">output frontier</span>. It also killed many attractive ideas before they could poison a submission: hard palette masks, fixed DSL optimism, value-blind scheduling, and raw correlated voting.</p><p>The notebook itself remains the control. The new ideas are deliberately <span class="term" tabindex="0" data-definition="A proposal path evaluated alongside the control but not allowed to replace it until it passes a promotion gate.">shadow lanes</span> until they beat it on frozen candidates, unique classes, wall-clock, and <span class="term" tabindex="0" data-definition="Official scoring of the best of two submitted answers for a test position, when the competition permits two attempts.">pass@2</span>.</p></div>
+        </div>
+      </section>
+
+      <section id="findings" class="section-shell section-block">
+        <div class="section-heading"><div><div class="section-kicker">02 / Overnight findings</div><h2>What survived 217 iterations</h2></div><p class="hint"><span class="hint-dot">?</span> Hover or focus dotted terms for definitions.</p></div>
+        <div class="finding-grid">
+          <article class="finding-card featured"><div class="card-number">01</div><div><h3>The metric changes the architecture</h3><p>ARC rewards output positions, so the right objective is expected unique correct classes per second. A task-level average can hide wasted compute on already-solved positions and correlated replicas.</p><div class="formula">gain / second = unresolved mass × novelty × selector recovery ÷ cost</div></div></article>
+          <article class="finding-card"><div class="card-number">02</div><div><h3>Exact fit is not proof</h3><p>A program that reproduces every demonstration belongs in the <span class="term" tabindex="0" data-definition="The finite set of hypotheses consistent with all observed demonstrations.">version space</span>; it is not automatically the target rule. Promotion needs typed effects, counterexamples, complexity control, and task-disjoint calibration.</p></div></article>
+          <article class="finding-card"><div class="card-number">03</div><div><h3>Use specialists, keep the baseline</h3><p>Object graphs, role/effect equations, cellular rules, scene graphs, motif panels, and evolutionary search recovered narrow proposal families. None earned the right to replace the neural baseline. Their value is complementary recall.</p></div></article>
+          <article class="finding-card"><div class="card-number">04</div><div><h3>Correlation is an accounting problem</h3><p>Augmentation views and replicas are not independent votes by default. Preserve <span class="term" tabindex="0" data-definition="Metadata recording which generator, model, augmentation, and refinement path produced a candidate.">provenance</span>, collapse duplicate semantic outputs, and credit independent <span class="term" tabindex="0" data-definition="A candidate-generation path with its own model, seed, augmentation, or search history.">lineages</span> separately.</p></div></article>
+          <article class="finding-card"><div class="card-number">05</div><div><h3>Shape is the safe structural gate</h3><p>The paranoid size predictor fired correctly on 882/882 training cases and 109/109 evaluation cases. The allowlisted shape family reached 727/727 and 119/119. Extra fired-count was not enough to justify promotion because aggregate runtime savings were small.</p></div></article>
+          <article class="finding-card warning"><div class="card-number">06</div><div><h3>Palette hard masks are unsafe</h3><p>Exact palette rules had cross-fold violations. The correct design is full palette support with soft evidence or mixture branches. A hard constraint that is usually right but occasionally wrong destroys recall exactly where the search is already fragile.</p></div></article>
+          <article class="finding-card"><div class="card-number">07</div><div><h3>Long grids break absolute thresholds</h3><p>A fixed sequence threshold of <span class="math">−log(0.2)</span> demands mean token probabilities near 0.996 at length 400 and 0.998 at length 900. Use an incumbent-preserving union of absolute and calibrated length-normalized frontiers, with a <span class="term" tabindex="0" data-definition="A finite-sample distribution-free threshold formed from an order statistic of held-out calibration scores.">conformal</span> gate.</p></div></article>
+          <article class="finding-card"><div class="card-number">08</div><div><h3>The controller is the learned component</h3><p>Four L4s and 12 hours make allocation a first-class model. Route work by marginal output value divided by calibrated cost, maintain a deadline reserve, and spend more on unresolved and complementary positions.</p></div></article>
+          <article class="finding-card featured"><div class="card-number">09</div><div><h3>Cost calibration is the clearest operational win</h3><p>Training-only area/demo buckets reduced evaluation task-cost MAE from 625.43 to 81.61 and raised Pearson correlation from 0.9916 to 0.9977. In a 240-task geometry replay, calibrated ordering completed 192/207/219/229/237 tasks versus 179/193/206/217/226 for raw visible-cost ordering at 55–95% capacity.</p></div></article>
+          <article class="finding-card"><div class="card-number">10</div><div><h3>Two finals are a portfolio, not a second thought</h3><p>Each final must be a complete valid submission. Optimize complementary private-half risk at the whole-submission level; never assemble a malformed “best per position” hybrid after the fact.</p></div></article>
+        </div>
+      </section>
+
+      <section id="method" class="section-shell section-block method-section">
+        <div class="section-kicker">03 / The proposed machine</div>
+        <div class="method-grid">
+          <div><h2>Proof-carrying search<br />under distribution shift</h2><p class="muted">The practical system is a hierarchy. Every stricter assumption buys compute only if its proof obligation is met.</p></div>
+          <div class="pipeline" aria-label="Proposed solver pipeline">
+            <div class="pipeline-row"><span class="pipeline-index">A</span><div><strong>Generate</strong><small>TTT, DFS, TRM, verified programs, recursive correction</small></div><span class="tag tag-blue">many candidates</span></div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-row"><span class="pipeline-index">B</span><div><strong>Certify</strong><small>demo fit, typed effects, counterexamples, shape grammar</small></div><span class="tag tag-green">proof energy</span></div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-row"><span class="pipeline-index">C</span><div><strong>Quotient</strong><small>semantic classes, lineage correlation, D4/view provenance</small></div><span class="tag tag-violet">unique recall</span></div>
+            <div class="pipeline-arrow">↓</div>
+            <div class="pipeline-row"><span class="pipeline-index">D</span><div><strong>Select</strong><small>whole-vector judge, robust pass@2, private-shift prior</small></div><span class="tag tag-orange">score action</span></div>
+          </div>
+        </div>
+        <div class="equation-card"><div class="equation-label">selection principle</div><div class="equation">y<sup>⋆</sup> = arg max<sub>y ∈ C(D)</sub> &nbsp; [ &nbsp; log P(y | D) + λ·proof(y) − μ·correlation(y) − ν·shift-risk(y) &nbsp; ]</div><p><span class="term" tabindex="0" data-definition="D is the demonstration set; C(D) is the candidate set after only sound or explicitly soft constraints.">The candidate set stays open</span> whenever a constraint is uncertain. This is the monotonicity invariant: adding a lane may add a candidate, but must not delete the incumbent merely because the new lane abstains.</p></div>
+      </section>
+
+      <section class="section-shell evidence-section">
+        <div class="section-heading"><div><div class="section-kicker">04 / Evidence, not vibes</div><h2>Numbers worth carrying forward</h2></div><p class="muted">All measurements below are CPU audits or labeled-fold replay, not hidden-test claims.</p></div>
+        <div class="evidence-grid">
+          <div class="evidence-card"><div class="evidence-value">882/882</div><div class="evidence-label">training size-cap fires correct</div><div class="meter"><span style="width:100%"></span></div></div>
+          <div class="evidence-card"><div class="evidence-value">109/109</div><div class="evidence-label">evaluation size-cap fires correct</div><div class="meter"><span style="width:100%"></span></div></div>
+          <div class="evidence-card"><div class="evidence-value">625 → 82</div><div class="evidence-label">cost MAE after calibration</div><div class="meter"><span style="width:87%"></span></div></div>
+          <div class="evidence-card"><div class="evidence-value">+13 → +11</div><div class="evidence-label">calibrated queue advantage across replay capacities</div><div class="meter"><span style="width:76%"></span></div></div>
+        </div>
+        <div class="callout"><span class="callout-symbol">∴</span><p><strong>Interpretation:</strong> runtime improvements only matter when converted into independent candidate classes or repairs. Token slots are a budget proxy; they are not points.</p></div>
+      </section>
+
+      <section class="section-shell section-block timeline-section">
+        <div class="section-kicker">05 / The 200+ iteration map</div>
+        <h2>From baseline audit to release gates</h2>
+        <div class="timeline">
+          <div class="timeline-item"><span class="timeline-range">0—35</span><div><h3>Foundations & symbolic substrate</h3><p>Baseline audit, version-space theorem, pass@2 selector, latent roles, typed composition, correspondence, graph LGG, relational transport, effect equations, and proof-carrying promotion.</p></div></div>
+          <div class="timeline-item"><span class="timeline-range">36—83</span><div><h3>Integration, budget, and falsification</h3><p>Holistic selection, context compression, four-GPU scheduling, private-shift calibration, compiled libraries, adaptive grammar, CEGIS, MDL, counterfactual probes, and official constraint refreshes.</p></div></div>
+          <div class="timeline-item"><span class="timeline-range">84—127</span><div><h3>Lineage, provenance, and robust selection</h3><p>Trace alignment, Leg-C contracts, repair economics, lineage sampling, candidate denominators, judge councils, task-position calibration, evolutionary mutation/crossover, behavioral archives, and ambiguity gates.</p></div></div>
+          <div class="timeline-item"><span class="timeline-range">128—151</span><div><h3>Specialist families & distribution shift</h3><p>Real-data constraint envelopes, motif panels, cellular rules, color-role quotienting, renderer limits, covariate reweighting, contamination guards, candidate-support ceilings, and the independent-modality theorem.</p></div></div>
+          <div class="timeline-item"><span class="timeline-range">152—184</span><div><h3>Compute, scenes, and recursive correction</h3><p>Fixed-cache ablations, output-value scheduling, scene graphs, object deletion, connectivity, geometric analogy, shape/palette pruning, soft-masked refinement, long-grid handling, on-policy denoising, robust routing, and demo-balanced TTT.</p></div></div>
+          <div class="timeline-item current"><span class="timeline-range">185—217</span><div><h3>High-leverage decoding & queue economics</h3><p>View calibration, median-order bounds, D4 equivariance, Reynolds projection, orbit budgets, behavioral quotients, score-delta portfolio math, grammar safety, shape allowlists, long-grid frontiers, conformal thresholds, and calibrated output cost.</p></div></div>
+        </div>
+      </section>
+
+      <section id="handoff" class="section-shell handoff-section">
+        <div class="handoff-top"><div><div class="section-kicker">06 / Handoff</div><h2>Build the notebook in this order</h2><p>Another orchestrator can pick up here. The full checklist is available in the linked TODO; this is the release-critical spine.</p></div><a class="button button-dark" href="KAGGLE_NOTEBOOK_HANDOFF_TODO.md">Full TODO ↗</a></div>
+        <div class="todo-list">
+          <div class="todo done"><span class="todo-check">✓</span><div><strong>Freeze the current 14-cell hybrid as control</strong><small>Keep size cap, cheap-first, Leg-C, and diverse attempt-2 visible and unchanged.</small></div><span class="status status-control">CONTROL</span></div>
+          <div class="todo"><span class="todo-check">01</span><div><strong>Build a frozen candidate cache</strong><small>Store output grids, scores, lineages, views, programs, and exact task-position provenance.</small></div><span class="status status-blocker">FIRST</span></div>
+          <div class="todo"><span class="todo-check">02</span><div><strong>Run shape-only grammar ablation</strong><small>Compare cap-only vs grammar at equal seeds; require no incumbent recall loss.</small></div><span class="status">SHADOW</span></div>
+          <div class="todo"><span class="todo-check">03</span><div><strong>Add the normalized length frontier</strong><small>Calibrate by task-disjoint fold, area, view, and shape source; preserve the absolute branch.</small></div><span class="status">SHADOW</span></div>
+          <div class="todo"><span class="todo-check">04</span><div><strong>Quotient candidates by semantic class</strong><small>Collapse duplicates, retain provenance, and measure unique correct-class recovery.</small></div><span class="status">SHADOW</span></div>
+          <div class="todo"><span class="todo-check">05</span><div><strong>Replace queue cost with calibrated unknown-output cost</strong><small>Use output value / cost with a deadline reserve; validate p90 wall-clock and pass@2.</small></div><span class="status">SHADOW</span></div>
+          <div class="todo"><span class="todo-check">06</span><div><strong>Promote only after four-worker replay</strong><small>Then validate notebook schema, licensing, runtime, and one controlled Kaggle submission.</small></div><span class="status status-gate">GATE</span></div>
+        </div>
+      </section>
+
+      <section id="archive" class="section-shell archive-section">
+        <div class="section-heading"><div><div class="section-kicker">07 / Public archive</div><h2>Everything else worth keeping</h2></div><p class="muted">Research only: no credentials, private data, or personal dossiers.</p></div>
+        <div class="archive-grid">
+          <a class="archive-card primary" href="AUTORESEARCH_LOG_2026-09-01.md"><span class="archive-type">FULL LOG</span><h3>Autoresearch chronology</h3><p>Every hypothesis, proof sketch, falsification, and decision from the overnight loop.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="AUTORESEARCH_CHECKPOINT.md"><span class="archive-type">HANDOFF</span><h3>Resume checkpoint</h3><p>Current state, release recommendation, and the exact resume protocol.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/blob/main/docs/recon-2026-08-31.md" target="_blank" rel="noreferrer"><span class="archive-type">RECON</span><h3>Public ecosystem map</h3><p>Baseline lineages, public models, datasets, kernels, and Kaggle packaging notes.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/blob/main/docs/hidden-research-2026-08-31.md" target="_blank" rel="noreferrer"><span class="archive-type">METHODS</span><h3>Unconventional research sweep</h3><p>PTRM, SOAR, recursive refinement, ABPR, neighborhood rules, and other public method evidence.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/tree/main/experiments" target="_blank" rel="noreferrer"><span class="archive-type">CODE</span><h3>Executable experiment contracts</h3><p>CPU-checkable modules for selectors, constraints, calibration, provenance, and scheduling.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/tree/main/tests" target="_blank" rel="noreferrer"><span class="archive-type">CHECKS</span><h3>Falsification tests</h3><p>Small tests that make claims auditable before touching the scored notebook.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/blob/main/docs/PLAN.md" target="_blank" rel="noreferrer"><span class="archive-type">PLAN</span><h3>Campaign scaffold</h3><p>Historical strategy and budget notes, retained as context rather than current truth.</p><span class="archive-arrow">↗</span></a>
+          <a class="archive-card" href="https://github.com/RaphaelKhalid/arcagi2kaggle/blob/main/docs/TRAINING_TRACK.md" target="_blank" rel="noreferrer"><span class="archive-type">TRAINING</span><h3>Offline training track</h3><p>How data generation and offline SFT fit around the 12-hour inference budget.</p><span class="archive-arrow">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer section-shell"><div><span class="brand-mark">∴</span> ARC/RESEARCH</div><p>Open research notebook for ARC-AGI-2 · MIT-0 repository · updated 02 Sep 2026</p><a href="https://github.com/RaphaelKhalid/arcagi2kaggle" target="_blank" rel="noreferrer">View source on GitHub ↗</a></footer>
+    <script src="app.js"></script>
+  </body>
+</html>

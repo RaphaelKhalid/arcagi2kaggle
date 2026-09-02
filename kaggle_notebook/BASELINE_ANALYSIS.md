@@ -1,7 +1,10 @@
 # Baseline Analysis — `mikelou1/arc-agi2-lb33-89-minimal-perfpatch` (public LB 33.89)
 
-Source: pulled 2026-08-31. 9 cells; cells 3–6 are `%%writefile` modules (`arc_loader.py`,
-`arc_decoder.py`, `arc_solver.py`, `starter.py`), cell 7 launches the solver, cell 8 builds
+Source: pulled 2026-08-31 and reconciled with the current 2026-09-02 artifact. The current
+notebook has 14 cells, 12 code cells, and 6 `%%writefile` modules; it includes cheap-first
+ordering, Leg-C hooks, diverse attempt-2 selection, and a conservative unanimous size cap.
+The historical source had 9 cells; cells 3–6 were `%%writefile` modules (`arc_loader.py`,
+`arc_decoder.py`, `arc_solver.py`, `starter.py`), cell 7 launched the solver, and cell 8 built
 `submission.json`. Lineage: ARChitects 2024 pipeline + NVARC public Qwen3-4B checkpoint +
 CPU↔GPU logits perf patch. Original run metadata: accelerator `nvidiaL4` (the 4×L4 machine),
 docker image version 31090, internet off.
@@ -74,10 +77,16 @@ even for skipped tasks), then `fill_submission` overwrites attempts 1–2 from t
 
 - Cell 1: `global_end_time = t0 + 12 h − 600 s`; cell 7 passes it to starter.py.
 - 240 tasks ÷ 4 workers = 60 tasks/GPU in ≈ 710 min → ~11.8 min/task average available.
-  Worst-case per task ≈ TTT (uncapped, ~2–6 min) + up to 20 min decode. Tasks are pulled from a
-  queue in **sorted key order** — no cost-aware scheduling; when time expires, remaining tasks
-  keep `[[0]]` placeholders (guaranteed zeros). Coverage — not per-task accuracy — is what the
-  perf patch bought; it is also our cheapest future lever.
+  Worst-case per task ≈ TTT (uncapped, ~2–6 min) + up to 20 min decode. The current queue is
+  ordered by estimated serialized cost when `CHEAP_FIRST_ORDER=True` (the historical baseline
+  used sorted keys); when time expires, remaining tasks keep `[[0]]` placeholders (guaranteed
+  zeros). Coverage — not per-task accuracy — is what the perf patch bought; it is also our
+  cheapest future lever.
+  The next scheduling ablation should use calibrated unresolved output value divided by cost,
+  because cheap-first ignores that the 240 tasks contain 259 independently scored outputs.
+  For cost, retain the current train/input serialization proxy and add training-fold calibrated
+  expected test-output serialization cost when no audited shape cap exists; do not substitute the
+  932-token worst case, which distorts task ordering.
 - Eval mode (no `KAGGLE_IS_COMPETITION_RERUN`): starter.py runs **only 4 hardcoded tasks**
   (`0934a4d8, 36a08778, 981571dc, aa4ec2a5`) against the 120-task evaluation file — a ~26-min
   smoke test used for the "Save Version" commit; the full 12 h happens only in the scoring rerun.
@@ -108,15 +117,30 @@ state + 8192-ctx activations; the notebook prints per-phase `max_memory_allocate
 
 ## Injection seams for planned upgrades
 
-1. **Symbolic size/palette constraints → DFS** (`arc_solver.py`):
-   compute constraints from `puzzle_ds` demos at the top of the task loop in `worker()`; pass
-   them into `inference_turbo_dfs` → `turbo_dfs`. Two hooks: (a) the candidate loop
-   `for token_idx, t in enumerate(ARC_TOKENS)` — mask colors outside the predicted palette,
-   force `Ċ` at a predicted row width, force EOS at predicted height; (b) the `max_new_tokens`
-   argument — tightening it from ~932 to the predicted output size is the single biggest DFS
-   pruning lever. CAUTION: constraints must be transformed per view (height/width swap under
-   rot90/transpose; palette must be mapped through the view's color permutation — parse the
-   ops from the subkey suffix and reuse `forward_mod` semantics).
+1. **Conditionally safe symbolic shape constraints → DFS** (`arc_solver.py`):
+   The notebook currently has a conservative `SIZE_CAP_TOKENS` path using the embedded
+   unanimous `predict_size_paranoid` copy. A shadow replacement should compute constraints
+   from `puzzle_ds` demos at the top of the task loop in `worker()` and pass them into
+   `inference_turbo_dfs` → `turbo_dfs`. The current hard-gate candidate is the
+   allowlist `{same_as_input, transpose, largest_obj_4, largest_obj_8, smallest_obj_4,
+   smallest_obj_8}` from `experiments/safe_shape_family.py`, and only when all surviving rules
+   agree after a disjoint-fold zero-false-negative audit. Do not hard-mask from demo-output
+   constants, ratios, affine offsets, or exact inferred palettes: each has observed
+   cross-fold failures. Palette bounds remain soft evidence or a mixture branch. The existing
+   unanimous cap remains the release fallback until the allowlist is replayed with exact
+   augmented-key behavior and equal-seed recall/wall-clock checks. The preferred shadow policy
+   is primary-unanimous prediction first, allowlisted prediction only on primary abstention;
+   never replace a primary cap or resolve a disagreement by fiat. Once shape is gated, force
+   `Ċ` at the predicted row width and EOS at predicted height; tightening
+   `max_new_tokens` from ~932 to the predicted output size is the main DFS pruning lever.
+   CAUTION: constraints must be transformed per view (height/width swap under
+   rot90/transpose; any palette feature must be mapped through the view's color permutation —
+   parse the ops from the subkey suffix and reuse `forward_mod` semantics). The fixed token
+   contract is checkpoint-specific: this notebook's `grids15` vocabulary maps digits 0–9 to
+   IDs 0–9, newline to 10, and `<|im_end|>` to 15.
+   If DFS logits are renormalized over grammar-legal tokens, use that score only within a
+   fixed validated shape or add explicit shape evidence; otherwise forced newline/EOS tokens
+   are normalized away and cross-shape ranking becomes artificially biased.
 2. **Alternative selection algorithms** (`arc_decoder.py` / cell 8): add functions beside
    `score_kgmon` in `selection_algorithms`; candidates expose `beam_score`, 8 `score_aug`
    values, and the raw `solution` grid, and cell 8 has the original task (demos included) in

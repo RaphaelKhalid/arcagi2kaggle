@@ -2,6 +2,8 @@
 
 Open-source campaign for the [ARC Prize 2026 — ARC-AGI-2](https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2) Kaggle competition.
 
+Read the public research site: [ARC/RESEARCH](https://raphaelkhalid.github.io/arcagi2kaggle/).
+
 Approach: the public NVARC-lineage test-time-training baseline (Qwen3-4B, per-task LoRA
 fine-tuning, DFS decoding, augmentation-consistency selection) extended with neurosymbolic
 components — falsification-based symbolic predictors that constrain decoding, verified
