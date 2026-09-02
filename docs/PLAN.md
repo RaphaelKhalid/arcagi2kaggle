@@ -1,5 +1,10 @@
 # Campaign Plan — ARC Prize 2026 (ARC-AGI-2)
 
+> Status note (2026-09-02): the historical 34.44 top-eight reference below is
+> stale. The active research target is the current 70.42–72.08 leaderboard
+> band; see `AUTORESEARCH_LOG_2026-09-01.md` Iteration 191. This file remains
+> a historical campaign scaffold until the offline high-score path is proven.
+
 Deadline: final submissions Nov 2, 2026 (23:59 UTC); writeup artifacts within 7 days after.
 Prize targets: top-8 progress prize (cutoff 34.44 and rising as of Aug 31) and the $275k
 Grand Prize writeup (judged on accuracy, universality, progress, theory, completeness, novelty).

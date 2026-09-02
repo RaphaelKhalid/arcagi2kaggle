@@ -1,5 +1,9 @@
 # V2 Notebook Design — Three-Lineage Combination
 
+> Status note (2026-09-02): the `>34.44` target is a legacy milestone, not the
+> current top-eight objective. The active target is the 70s band described in
+> `AUTORESEARCH_LOG_2026-09-01.md` Iteration 191.
+
 Target: >34.44 (top-8 cutoff, rising). Ship only after V1 (baseline reproduction) returns a
 clean score. Every element below exists publicly and is proven individually; the combination
 is not (docs/recon-2026-08-31.md §4, §7).
