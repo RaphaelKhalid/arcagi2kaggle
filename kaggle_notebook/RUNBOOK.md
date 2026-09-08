@@ -87,12 +87,14 @@ so ±0.8 is one task; do not over-read small deltas.
 |--------|---------|--------|----------|
 | `CHEAP_FIRST_ORDER` | on | queue cost-ascending (coverage ↑) | deterministic, complete, monotone on training/evaluation files |
 | `SIZE_CAP_TOKENS` | on | DFS capped at predicted grid tokens per augmented view | 882/882 + 107/107 correct fires on public data; view parity verified |
-| `DIVERSE_ATTEMPT_2` | on | attempt_2 from probmul_3 when it disagrees with kgmon | unit tests; dry run |
+| `DIVERSE_ATTEMPT_2` | on | attempt_2 = best probmul_3 grid that differs from attempt_1 (same selection as submission #1) | unit tests; dry run |
 | `LEGC_ENABLED` | **off** | Qwen2.5-Coder-7B verified induction pre-pass (1 h budget) | the run with it on scored 29.31 vs 33.89 baseline |
 
 Always-on robustness (no effect on results): sentinel worker loop, deadline-aware test-time training,
-per-task crash guard with a two-failure circuit breaker, `timeout`-wrapped launcher, unreadable candidate
-files skipped, crash-proof eval-mode diagnostics, smoke-task fallback.
+per-task crash guard with a two-failure circuit breaker (a poisoned CUDA context stops only its own
+worker), `timeout`-wrapped launcher, unreadable candidate files skipped, crash-proof eval-mode
+diagnostics, smoke-task fallback, and a commit run that FAILS if the workers decoded nothing (so a
+broken environment can never be submitted).
 
 To change a switch: edit `PROFILE` **and** the matching default in `src/` (the builder tells you if they
 disagree), rebuild, run the tests, push. All switches off = byte-equivalent baseline behaviour. Turning

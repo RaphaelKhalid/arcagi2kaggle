@@ -390,6 +390,7 @@ def worker(rank, queue, end_time):
         if key is None:
             break
 
+        failed = False
         try:
             model = _solve_task(rank, key, end_time, model, tokenizer, default_weights, collator, formatter,
                                 train_args, max_new_tokens, max_score, arc_test_set, raw_challenges,
@@ -397,10 +398,21 @@ def worker(rank, queue, end_time):
             consecutive_failures = 0
         except Exception:
             consecutive_failures += 1
+            failed = True
             print(f"[Rank {rank}] ERROR on puzzle {key} (failure {consecutive_failures}):", flush=True)
             traceback.print_exc()
-            gc.collect()
-            torch.cuda.empty_cache()
+        if failed:
+            # Outside the except block, so the traceback no longer pins the failed task's
+            # frame (trainer, optimizer state, activations) and the cleanup can free it.
+            # A CUDA call that fails here means the context is poisoned: stop THIS worker
+            # cleanly (exit code 0). Raising would make mp.spawn terminate the other
+            # three workers as well.
+            try:
+                gc.collect()
+                torch.cuda.empty_cache()
+            except Exception:
+                print(f"[Rank {rank}] CUDA context unusable; stopping this worker", flush=True)
+                break
             if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
                 print(f"[Rank {rank}] giving up after {consecutive_failures} consecutive failures", flush=True)
                 break

@@ -24,7 +24,9 @@ def task_cost(task):
     costs the sum over train pair inputs+outputs and test inputs.
     """
     def grid_tokens(grid):
-        return len(grid) * len(grid[0]) + len(grid)
+        rows = len(grid)
+        cols = len(grid[0]) if rows else 0
+        return rows * cols + rows
 
     cost = 0
     for pair in task["train"]:
@@ -34,11 +36,19 @@ def task_cost(task):
     return cost
 
 
+def safe_cost(task):
+    """task_cost, but a malformed task sorts last instead of aborting the launcher."""
+    try:
+        return task_cost(task)
+    except Exception:
+        return float("inf")
+
+
 def order_keys(data, cheap_first):
     """Deterministic queue order; ties broken by key either way."""
     if not cheap_first:
         return sorted(data.keys())
-    return sorted(data.keys(), key=lambda k: (task_cost(data[k]), k))
+    return sorted(data.keys(), key=lambda k: (safe_cost(data[k]), k))
 
 
 def fully_verified_task_ids(results):
@@ -134,5 +144,13 @@ if __name__ == "__main__":
         queue.put(key)
     for _ in range(4):
         queue.put(None)
-    
+
+    # Rendezvous files from an earlier launch in the same session would let ranks 1-3
+    # skip the serialized unsloth import; start from a clean slate.
+    for rank in range(4):
+        try:
+            os.remove(f"/kaggle/worker{rank}")
+        except OSError:
+            pass
+
     mp.spawn(local_worker, args=(queue, args.end_time), nprocs=4)

@@ -27,7 +27,8 @@ scoring, top-2 selection. On top of it, each behind its own switch in `kaggle_no
 - `SIZE_CAP_TOKENS` — a falsification-based output-size predictor caps DFS decoding at the predicted grid's
   token count. It fires only when a rule explains every demonstration; 100% precise on every fired training
   and evaluation output (882/882 and 107/107 on the public data).
-- `DIVERSE_ATTEMPT_2` — attempt_2 comes from a second ranking family when it disagrees with the first.
+- `DIVERSE_ATTEMPT_2` — attempt_2 is the best `score_full_probmul_3` grid that differs from attempt_1 (a second
+  ranking family instead of rank 2 of the same ranking).
 - `LEGC_ENABLED` (off) — verified program induction with Qwen2.5-Coder-7B as a pre-pass.
 
 ## Layout

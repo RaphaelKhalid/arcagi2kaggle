@@ -92,8 +92,9 @@ def header_markdown(profile: dict) -> str:
         "- `SIZE_CAP_TOKENS` — a falsification-based output-size predictor (fires only when a rule explains every\n"
         "  demonstration; 100% precise on all fired training/evaluation outputs) caps DFS decoding at the predicted\n"
         "  grid's token count per augmented view instead of the 30x30 worst case.\n"
-        "- `DIVERSE_ATTEMPT_2` — attempt_1 stays the baseline `score_kgmon` top pick; attempt_2 becomes the\n"
-        "  `score_full_probmul_3` top pick when the two rankers disagree (fallback: baseline top-2).\n"
+        "- `DIVERSE_ATTEMPT_2` — attempt_1 stays the baseline `score_kgmon` top pick; attempt_2 is the\n"
+        "  highest-ranked `score_full_probmul_3` grid that differs from it (a second ranking family instead\n"
+        "  of rank 2 of the same ranking).\n"
         "- Robustness fixes that do not change results: sentinel-based worker queue loop, deterministic\n"
         "  tie-breaking in candidate ranking, and a crash-proof eval-mode benchmark so the commit run\n"
         "  always completes.\n\n"
@@ -116,12 +117,14 @@ ENV_CELL = (
 
 LAUNCH_CELL = (
     "# Workers stop pulling tasks at global_end_time. `timeout` is a safety net for a hung\n"
-    "# worker: the launcher is killed shortly after the deadline so the selection cell below\n"
-    "# always runs inside the 12 h limit with whatever candidates were written.\n"
+    "# worker: shortly after the deadline the whole launcher process group (starter.py, the\n"
+    "# four GPU workers, the queue manager) is SIGKILLed so the selection cell below always\n"
+    "# runs inside the 12 h limit with whatever candidates were written. A file cut off by\n"
+    "# the kill is skipped by the loader.\n"
     "import time\n"
     "launcher_timeout = max(60, int(global_end_time - time.time()) + 240)\n"
     "!UNSLOTH_DISABLE_STATISTICS=1 TRITON_PTXAS_PATH=/usr/local/cuda/bin/ptxas OMP_NUM_THREADS=12 "
-    "timeout -k 30 {launcher_timeout} python starter.py --end-time {global_end_time}\n"
+    "timeout -s KILL {launcher_timeout} python starter.py --end-time {global_end_time}\n"
 )
 
 
@@ -191,10 +194,11 @@ def selection_cell(profile: dict) -> str:
         "\n"
         "# Baseline behavior: run_selection_algo() ranks candidates with score_kgmon and the\n"
         "# submission takes its top-2. Diverse mode keeps the score_kgmon top pick as attempt_1\n"
-        "# (identical to the baseline's attempt_1) and uses the score_full_probmul_3 top pick as\n"
-        "# attempt_2 whenever the two algorithms disagree, so the attempts test two scoring\n"
-        "# hypotheses instead of ranks 1-2 of a single ranking. When both algorithms agree on the\n"
-        "# winner (or probmul_3 has no differing candidate), fall back to the exact baseline top-2.\n"
+        "# (identical to the baseline's attempt_1) and takes attempt_2 from the OTHER ranking\n"
+        "# family: the highest-ranked score_full_probmul_3 grid that differs from attempt_1\n"
+        "# (probmul_3's winner when the two rankers disagree, otherwise its runner-up). Only when\n"
+        "# probmul_3 has no differing grid does the entry fall back to the baseline top-2.\n"
+        "# This is exactly the selection that ran in submission #1.\n"
         "# DIVERSE_ATTEMPT_2 = False restores baseline selection exactly (injected by build_notebook.py).\n"
         f"DIVERSE_ATTEMPT_2 = {profile['DIVERSE_ATTEMPT_2']}\n"
         "\n"
@@ -218,8 +222,9 @@ def selection_cell(profile: dict) -> str:
         "print(f\"*** submission.json written: {len(submission)} tasks\")\n"
         "\n"
         "if not rerun_mode:\n"
-        "    # Diagnostics only (public evaluation file). submission.json is already on disk;\n"
-        "    # nothing below may prevent the commit run from completing.\n"
+        "    # Commit run: submission.json is already on disk. Diagnostics must not crash the\n"
+        "    # cell, but a run in which the workers decoded NOTHING must fail loudly so that a\n"
+        "    # broken environment (imports, model mount, CUDA) can never be submitted.\n"
         "    try:\n"
         "        decoder.benchmark_selection_algos()\n"
         "    except Exception as exc:\n"
@@ -227,6 +232,8 @@ def selection_cell(profile: dict) -> str:
         "    with open(\"submission.json\", \"r\") as f:\n"
         "        reload_submission = json.load(f)\n"
         "    print(\"*** Reload score:\", data.validate_submission(reload_submission))\n"
+        "    if not decoder.decoded_results:\n"
+        "        raise RuntimeError(\"commit run produced no decoded candidates: the worker path is broken; do not submit this version\")\n"
     )
 
 

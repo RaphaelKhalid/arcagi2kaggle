@@ -158,9 +158,9 @@ state + 8192-ctx activations; the notebook prints per-phase `max_memory_allocate
 ## Fork delta (v1) — see notebook.ipynb final cell
 
 `DIVERSE_ATTEMPT_2 = True`: attempt_1 stays the **score_kgmon top pick** (exact known-good
-baseline attempt_1); attempt_2 becomes the top `score_full_probmul_3` pick when it differs;
-when the two algorithms agree (or one has nothing), falls back to the exact baseline top-2 of
-`score_kgmon`. `False` restores byte-identical baseline selection. NOTE: the parent plan
+baseline attempt_1); attempt_2 is the highest-ranked `score_full_probmul_3` grid that differs from
+attempt_1 (probmul's winner on disagreement, otherwise its runner-up); only when probmul has no
+differing grid does the entry keep the baseline top-2 of `score_kgmon`. `False` restores byte-identical baseline selection. NOTE: the parent plan
 assumed `score_full_probmul_3` was the baseline default; deep-read shows the default is
 `score_kgmon` — the fork therefore keeps kgmon as attempt_1 to avoid perturbing the known-good
 behavior, and uses probmul_3 for diversity only.

@@ -72,7 +72,7 @@ class NotebookBuildTests(unittest.TestCase):
         writefiles = [i for i, s in enumerate(code) if s.startswith("%%writefile")]
         self.assertLess(max(writefiles), launch[0])
         # the launcher is wrapped in coreutils timeout so a hung worker cannot block the selection cell
-        self.assertIn("timeout -k 30 {launcher_timeout}", code[launch[0]])
+        self.assertIn("timeout -s KILL {launcher_timeout}", code[launch[0]])
 
     def test_kernel_metadata_matches_profile(self) -> None:
         self.assertEqual(build_notebook.check_metadata(build_notebook.PROFILE), [])
@@ -138,10 +138,16 @@ class DryRunTests(unittest.TestCase):
             sol = Path(tmp) / "s.json"
             ch.write_text(json.dumps(challenges), encoding="utf-8")
             sol.write_text(json.dumps(solutions), encoding="utf-8")
-            # missing directory: workers never started
-            sub = dry_run.run_cell(dry_run.selection_cell_source(False), ch, sol, Path(tmp) / "missing", work, False)
+            # missing directory: workers never started. The scoring rerun must still write a
+            # valid placeholder file; the commit run must write it AND then fail loudly.
+            sub = dry_run.run_cell(dry_run.selection_cell_source(True), ch, sol, Path(tmp) / "missing", work, True)
             self.assertEqual(validate_submission(sub, challenges), [])
             self.assertTrue(all(e == {"attempt_1": [[0]], "attempt_2": [[0]]} for v in sub.values() for e in v))
+            (work / "submission.json").unlink()
+            with self.assertRaises(RuntimeError):
+                dry_run.run_cell(dry_run.selection_cell_source(False), ch, sol, Path(tmp) / "missing", work, False)
+            sub = json.loads((work / "submission.json").read_text(encoding="utf-8"))
+            self.assertEqual(validate_submission(sub, challenges), [])
 
 
 if __name__ == "__main__":
