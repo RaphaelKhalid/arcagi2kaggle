@@ -323,7 +323,7 @@ def main() -> None:
             "language_info": {"name": "python", "version": "3.11"},
         },
         "nbformat": 4,
-        "nbformat_minor": 5,
+        "nbformat_minor": 4,
     }
     (ROOT / "notebook.ipynb").write_text(
         json.dumps(notebook, indent=1, ensure_ascii=False) + "\n", encoding="utf-8"
