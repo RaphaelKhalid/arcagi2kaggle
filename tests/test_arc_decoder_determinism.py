@@ -1,6 +1,6 @@
 import unittest
 
-from kaggle_nemotron_probe.arc_decoder import score_kgmon, score_log_evidence
+from arc_decoder import score_kgmon, score_log_evidence
 
 
 def item(grid):

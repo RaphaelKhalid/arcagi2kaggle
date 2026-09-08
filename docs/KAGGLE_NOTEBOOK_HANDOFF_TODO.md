@@ -1,5 +1,10 @@
 # ARC-AGI-2 Kaggle Notebook Handoff TODO
 
+> Status (2026-09-08): the control notebook is now generated from `kaggle_notebook/src/` by
+> `kaggle_notebook/build_notebook.py` (10 cells; Leg C off after the 29.31 result). Read
+> "14-cell hybrid" below as "the current generated notebook". Phases 1–6 remain the gates for
+> promoting anything from `experiments/` into `src/`.
+
 Purpose: give another orchestrator a release-oriented implementation sequence
 for the overnight autoresearch findings. The control notebook is
 `kaggle_notebook/notebook.ipynb`; reference material under `sources/` is read-only.

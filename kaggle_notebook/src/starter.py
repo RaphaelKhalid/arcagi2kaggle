@@ -14,7 +14,7 @@ CHEAP_FIRST_ORDER = True
 # Read Leg C verified-induction results (if the pre-pass ran) and refund their
 # queue slots to the base solver. No results file -> empty skip set -> baseline
 # behavior. Must match LEGC_ENABLED in the Leg C launch cell.
-LEGC_ENABLED = True
+LEGC_ENABLED = False
 
 
 def task_cost(task):
@@ -118,10 +118,19 @@ if __name__ == "__main__":
 
     queue = mp.Manager().Queue()
 
-    for key in order_keys(remaining, CHEAP_FIRST_ORDER):
-        if not rerun_mode:
-            if key not in ["0934a4d8", "36a08778", "981571dc", "aa4ec2a5"]:
-                continue
+    ordered = order_keys(remaining, CHEAP_FIRST_ORDER)
+    if not rerun_mode:
+        # Commit run: 4 known-solvable smoke tasks keep the run short; if the public
+        # evaluation file ever changes, fall back to the 4 cheapest tasks so the run
+        # still exercises the whole pipeline instead of producing nothing.
+        smoke = [k for k in ["0934a4d8", "36a08778", "981571dc", "aa4ec2a5"] if k in remaining]
+        if not smoke:
+            smoke = order_keys(remaining, True)[:4]
+            print(f"[starter] smoke tasks missing from the evaluation file; using {smoke}")
+        ordered = [k for k in ordered if k in smoke]
+    print(f"[starter] queueing {len(ordered)} task(s); cheap_first={CHEAP_FIRST_ORDER}")
+
+    for key in ordered:
         queue.put(key)
     for _ in range(4):
         queue.put(None)

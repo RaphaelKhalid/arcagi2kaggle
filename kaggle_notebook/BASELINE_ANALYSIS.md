@@ -1,13 +1,13 @@
 # Baseline Analysis — `mikelou1/arc-agi2-lb33-89-minimal-perfpatch` (public LB 33.89)
 
-Source: pulled 2026-08-31 and reconciled with the current 2026-09-02 artifact. The current
-notebook has 14 cells, 12 code cells, and 6 `%%writefile` modules; it includes cheap-first
-ordering, Leg-C hooks, diverse attempt-2 selection, and a conservative unanimous size cap.
-The historical source had 9 cells; cells 3–6 were `%%writefile` modules (`arc_loader.py`,
-`arc_decoder.py`, `arc_solver.py`, `starter.py`), cell 7 launched the solver, and cell 8 built
-`submission.json`. Lineage: ARChitects 2024 pipeline + NVARC public Qwen3-4B checkpoint +
-CPU↔GPU logits perf patch. Original run metadata: accelerator `nvidiaL4` (the 4×L4 machine),
-docker image version 31090, internet off.
+Source: pulled 2026-08-31; reconciled 2026-09-08 with the generated notebook. The current notebook is
+built by `build_notebook.py` from `src/` (10 cells: header, budget, env, five `%%writefile` modules,
+launcher, selection). Active switches: cheap-first ordering, unanimous size cap, diverse attempt-2;
+Leg C is off (its cells are only emitted when `LEGC_ENABLED` is true). The historical source had 9 cells;
+cells 3–6 were `%%writefile` modules (`arc_loader.py`, `arc_decoder.py`, `arc_solver.py`, `starter.py`),
+cell 7 launched the solver, and cell 8 built `submission.json`. Lineage: ARChitects 2024 pipeline + NVARC
+public Qwen3-4B checkpoint + CPU↔GPU logits perf patch. Original run metadata: accelerator `nvidiaL4`
+(the 4×L4 machine), docker image version 31090, internet off.
 
 ## Model
 

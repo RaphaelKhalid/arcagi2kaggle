@@ -1,6 +1,7 @@
 # Nemotron Lightning probe
 
-This directory is intentionally separate from `kaggle_notebook/`. It measures
+This directory is intentionally separate from `kaggle_notebook/`, but its base
+pipeline cells are built from `kaggle_notebook/src/` (never fork those modules). It measures
 whether NVIDIA Nemotron 3.5 Lightning can add an ARC program-generation family;
 it cannot produce or submit a competition submission.
 

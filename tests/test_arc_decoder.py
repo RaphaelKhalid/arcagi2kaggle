@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from kaggle_nemotron_probe.arc_decoder import (
+from arc_decoder import (
     getter_log_evidence,
     score_kgmon,
     score_log_evidence,

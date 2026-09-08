@@ -87,13 +87,27 @@ class ArcDecoder:
         self.decoded_results = {}
 
     def load_decoded_results(self, store, run_name=""):
-        for key in os.listdir(store):
-            with bz2.BZ2File(os.path.join(store, key)) as f:
-                outputs = pickle.load(f)
+        # Workers write one file per augmented view while the 12 h budget runs out;
+        # a worker killed mid-write leaves a truncated bz2 file. Losing that one view
+        # must not lose the whole submission, so unreadable files are skipped.
+        if not os.path.isdir(store):
+            print(f"*** WARNING: no decoded results directory {store!r}; submission will be placeholders")
+            return
+        skipped = 0
+        for key in sorted(os.listdir(store)):
+            try:
+                with bz2.BZ2File(os.path.join(store, key)) as f:
+                    outputs = pickle.load(f)
+            except Exception as exc:
+                skipped += 1
+                print(f"*** WARNING: skipping unreadable result file {key!r}: {exc!r}")
+                continue
             base_key = key.split(".")[0]
             self.decoded_results[base_key] = self.decoded_results.get(base_key, {})
             for i, sample in enumerate(outputs):
                 self.decoded_results[base_key][f"{key}{run_name}.out{i}"] = sample
+        if skipped:
+            print(f"*** WARNING: {skipped} unreadable result file(s) skipped")
 
     def run_selection_algo(self, selection_algorithm=score_kgmon):
         return {bk: selection_algorithm({k: g for k, g in v.items()}) for bk, v in self.decoded_results.items()}
@@ -137,8 +151,13 @@ class ArcDecoder:
                 num_total_keys += 1
 
         print(f" subkeys: {num_solved_keys}/{num_total_keys}")
-        print(f" avg correct beam score: {np.mean(correct_beam_scores):8.5f}")
-        print(f" max correct beam score: {np.max(correct_beam_scores):8.5f}")
+        # Diagnostics only: np.max([]) raises when no candidate was correct, which
+        # would fail the commit run and make the version unsubmittable.
+        if correct_beam_scores:
+            print(f" avg correct beam score: {np.mean(correct_beam_scores):8.5f}")
+            print(f" max correct beam score: {np.max(correct_beam_scores):8.5f}")
+        else:
+            print(" no correct candidates among the decoded results")
 
         num_puzzles = len(num_tasks_per_puzzle)
 

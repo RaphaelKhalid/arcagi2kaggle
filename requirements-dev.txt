@@ -1,0 +1,7 @@
+# Local development / test dependencies (the notebook itself needs none of these installed locally).
+numpy>=1.26
+scipy>=1.11
+pytest>=8
+nbformat>=5.9
+# Optional: Kaggle CLI for pushing the kernel (or vendor it under .tools/).
+kaggle>=1.6

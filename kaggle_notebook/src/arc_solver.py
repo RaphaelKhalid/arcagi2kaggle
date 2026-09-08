@@ -16,7 +16,9 @@ from typing import Any, Union
 from transformers import DataCollatorForLanguageModeling
 
 import logging
+import traceback
 from contextlib import redirect_stdout, redirect_stderr
+from transformers import TrainerCallback
 
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
@@ -54,6 +56,27 @@ EOS_ID = 15
 SIZE_CAP_TOKENS = True
 
 from symbolic_size import predict_size_paranoid
+
+# Test-time training has no per-task cap in the baseline; only the queue pull and the
+# decode loop check the global deadline. With cheap-first ordering the most expensive
+# tasks are pulled last, so an uncapped TTT started just before the deadline could
+# overrun the 10-minute write buffer and leave NO submission. The callback stops
+# training at the deadline; MIN_TASK_SECONDS avoids starting work that cannot finish.
+MIN_TASK_SECONDS = 180
+# A worker that fails on consecutive tasks is assumed to have a poisoned CUDA context
+# and stops pulling tasks (they stay available to the other workers' shares of time).
+MAX_CONSECUTIVE_FAILURES = 2
+
+
+class DeadlineCallback(TrainerCallback):
+
+    def __init__(self, end_time):
+        self.end_time = end_time
+
+    def on_step_end(self, args, state, control, **kwargs):
+        if time.time() > self.end_time:
+            control.should_training_stop = True
+        return control
 
 
 class UnslothFixedTrainer(UnslothTrainer):
@@ -343,6 +366,7 @@ def worker(rank, queue, end_time):
 
     arc_test_set = ArcDataset.from_file(test_path)
 
+    raw_challenges = None
     if SIZE_CAP_TOKENS:
         with open(test_path, "r") as f:
             raw_challenges = json.load(f)
@@ -354,16 +378,39 @@ def worker(rank, queue, end_time):
     # a synchronization primitive for a managed multiprocessing queue: a
     # worker can observe a transient empty state and exit before a queued task
     # becomes visible.  Block on the sentinel protocol instead.
+    consecutive_failures = 0
+
     while True:
 
-        if time.time() > end_time:
+        if time.time() > end_time - MIN_TASK_SECONDS:
             print(f"[Rank {rank}] stop!")
             break
 
         key = queue.get()
         if key is None:
             break
-        
+
+        try:
+            model = _solve_task(rank, key, end_time, model, tokenizer, default_weights, collator, formatter,
+                                train_args, max_new_tokens, max_score, arc_test_set, raw_challenges,
+                                max_seq_length, dir_outputs)
+            consecutive_failures = 0
+        except Exception:
+            consecutive_failures += 1
+            print(f"[Rank {rank}] ERROR on puzzle {key} (failure {consecutive_failures}):", flush=True)
+            traceback.print_exc()
+            gc.collect()
+            torch.cuda.empty_cache()
+            if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                print(f"[Rank {rank}] giving up after {consecutive_failures} consecutive failures", flush=True)
+                break
+
+
+def _solve_task(rank, key, end_time, model, tokenizer, default_weights, collator, formatter,
+                train_args, max_new_tokens, max_score, arc_test_set, raw_challenges, max_seq_length, dir_outputs):
+    """One task: reset LoRA, test-time train, decode, score, persist (baseline body, unchanged)."""
+
+    if True:  # keeps the baseline body's indentation intact for diff-ability
         start_time = time.time()
         
         torch.cuda.reset_peak_memory_stats()
@@ -392,6 +439,8 @@ def worker(rank, queue, end_time):
                 max_seq_length=max_seq_length,
                 args=UnslothTrainingArguments(**train_args),
             )
+
+            trainer.add_callback(DeadlineCallback(end_time))
 
             stats = trainer.train()
 
@@ -559,3 +608,5 @@ def worker(rank, queue, end_time):
         
         spend_time = time.time() - start_time
         print(f"[Rank {rank}] finished {key} in {spend_time:.1f}s")
+
+    return model

@@ -6,7 +6,8 @@ class QueueProtocolTests(unittest.TestCase):
     def test_solver_uses_sentinel_get_not_empty_polling(self) -> None:
         source = (
             Path(__file__).resolve().parents[1]
-            / "kaggle_nemotron_probe"
+            / "kaggle_notebook"
+            / "src"
             / "arc_solver.py"
         ).read_text(encoding="utf-8")
         self.assertNotIn("while not queue.empty()", source)

@@ -7,7 +7,8 @@ class LegCQueueContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.source = (
             Path(__file__).resolve().parents[1]
-            / "kaggle_nemotron_probe"
+            / "kaggle_notebook"
+            / "src"
             / "starter.py"
         ).read_text(encoding="utf-8")
 

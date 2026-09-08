@@ -1,7 +1,7 @@
 """Assemble the Rawr-AGI-2 Nemo submission notebook.
 
-Fork of the proven Launch B baseline (kaggle_notebook/, scored 29.31 on the
-public LB): every base cell (env setup, arc_loader/arc_decoder/symbolic_size/
+Experimental fork of the submission notebook (kaggle_notebook/; its four-flag
+Launch B version scored 29.31 on the public LB): every base cell (env setup, arc_loader/arc_decoder/symbolic_size/
 arc_solver, starter.py, submission cell) is byte-identical. The only change is
 Leg C's induction engine: Qwen2.5-Coder-7B (arc_induction_v2.py, plain
 transformers bf16) is replaced with Nemotron-3.5-Lightning-30B-A3B-NVFP4 via
@@ -23,6 +23,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
+# The base pipeline modules are shared with the submission notebook; never fork them.
+BASE_SRC = ROOT.parent / "kaggle_notebook" / "src"
+BASE_MODULES = {"arc_loader.py", "arc_decoder.py", "symbolic_size.py", "arc_solver.py", "starter.py"}
 
 
 def code_cell(source: str) -> dict:
@@ -44,7 +47,11 @@ def markdown_cell(source: str) -> dict:
 
 
 def writefile_cell(filename: str) -> dict:
-    content = (ROOT / filename).read_text(encoding="utf-8")
+    directory = BASE_SRC if filename in BASE_MODULES else ROOT
+    content = (directory / filename).read_text(encoding="utf-8")
+    if filename == "starter.py":
+        assert content.count("\nLEGC_ENABLED = False\n") == 1, "starter.py flag line changed"
+        content = content.replace("\nLEGC_ENABLED = False\n", "\nLEGC_ENABLED = True\n", 1)
     return code_cell(f"%%writefile {filename}\n{content}")
 
 
@@ -53,7 +60,7 @@ def main() -> None:
         "cells": [
             markdown_cell(
                 "# Rawr-AGI-2 Nemo\n\n"
-                "Fork of the proven Launch B baseline (`kaggle_notebook/`, public LB 29.31): "
+                "Experimental fork of the submission notebook (`kaggle_notebook/`, whose four-flag Launch B version scored 29.31 on the public LB): "
                 "environment setup, `arc_loader.py`, `arc_decoder.py`, `symbolic_size.py`, "
                 "`arc_solver.py`, `starter.py`, the submission cell, and the Leg C merge cell "
                 "are byte-identical to that run.\n\n"
@@ -313,7 +320,7 @@ def main() -> None:
                 "language": "python",
                 "name": "python3",
             },
-            "language_info": {"name": "python", "version": "3.12"},
+            "language_info": {"name": "python", "version": "3.11"},
         },
         "nbformat": 4,
         "nbformat_minor": 5,
