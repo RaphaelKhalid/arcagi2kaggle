@@ -29,3 +29,7 @@ submission.json
 .idea/
 Thumbs.db
 .DS_Store
+
+# local agent notes (kept out of the repo)
+/AGENTS.md
+/CLAUDE.md
