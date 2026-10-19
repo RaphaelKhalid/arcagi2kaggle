@@ -6,7 +6,7 @@
 
 Target: >34.44 (top-8 cutoff, rising). Ship only after V1 (baseline reproduction) returns a
 clean score. Every element below exists publicly and is proven individually; the combination
-is not (docs/recon-2026-08-31.md §4, §7).
+is not.
 
 ## Time & GPU budget (12h − 10min safety)
 
